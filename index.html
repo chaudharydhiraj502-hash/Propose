@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Girlfriend? 💕</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: default;
+        }
+
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heart {
+            position: absolute;
+            font-size: 20px;
+            color: #ff69b4;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .content {
+            text-align: center;
+            z-index: 10;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .question {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin-bottom: 3rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .love-message {
+            font-size: clamp(2.5rem, 10vw, 5rem);
+            font-weight: bold;
+            color: #ff1493;
+            text-shadow: 0 4px 12px rgba(255,20,147,0.5);
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .love-message.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .yes-btn {
+            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
+            color: white;
+        }
+
+        .no-btn {
+            background: linear-gradient(45deg, #f8b500, #ffed4e);
+            color: #333;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .yes-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .yes-btn:hover::before {
+            left: 100%;
+        }
+
+        /* No button evasion styles */
+        .no-btn.evasive {
+            position: fixed;
+            z-index: 20;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 768px) {
+            .buttons {
+                gap: 1rem;
+            }
+            .btn {
+                padding: 0.8rem 2rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-container" id="heartsContainer"></div>
+    
+    <div class="content" id="content">
+        <div class="question" id="question">Will you be my girlfriend? 💕</div>
+        <div class="love-message" id="loveMessage">I Love You ❤️</div>
+        <div class="buttons" id="buttons">
+            <button class="btn yes-btn" id="yesBtn">Yes 💖</button>
+            <button class="btn no-btn" id="noBtn">No 😅</button>
+        </div>
+    </div>
+
+    <script>
+        // Floating hearts animation
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '💖';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+            heart.style.fontSize = (Math.random() * 10 + 15) + 'px';
+            
+            document.getElementById('heartsContainer').appendChild(heart);
+            
+            setTimeout(() => {
+                heart.remove();
+            }, 7000);
+        }
+
+        // Create hearts continuously
+        setInterval(createHeart, 300);
+
+        // Button functionality
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const question = document.getElementById('question');
+        const loveMessage = document.getElementById('loveMessage');
+        const buttons = document.getElementById('buttons');
+        const content = document.getElementById('content');
+
+        let noButtonX = 50;
+        let noButtonY = 50;
+        let isEvasive = false;
+
+        // Yes button click
+        yesBtn.addEventListener('click', function() {
+            question.classList.add('hidden');
+            buttons.classList.add('hidden');
+            
+            setTimeout(() => {
+                loveMessage.classList.add('show');
+                
+                // Celebration hearts
+                for(let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const heart = document.createElement('div');
+                        heart.innerHTML = '💕';
+                        heart.style.position = 'fixed';
+                        heart.style.left = '50%';
+                        heart.style.top = '50%';
+                        heart.style.fontSize = '30px';
+                        heart.style.zIndex = '30';
+                        heart.style.pointerEvents = 'none';
+                        heart.style.animation = 'float 2s ease-out forwards';
+                        document.body.appendChild(heart);
+                        
+                        setTimeout(() => heart.remove(), 2000);
+                    }, i * 100);
+                }
+            }, 400);
+        });
+
+        // No button hover/click evasion
+        function evadeNoButton(e) {
+            if (!isEvasive) return;
+            
+            const rect = noBtn.getBoundingClientRect();
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            // If mouse is close to button, move it
+            const distance = Math.sqrt(
+                Math.pow(mouseX - (rect.left + rect.width/2), 2) + 
+                Math.pow(mouseY - (rect.top + rect.height/2), 2)
+            );
+            
+            if (distance < 100) {
+                // Move to random position (avoid edges)
+                noButtonX = 20 + Math.random() * 60;
+                noButtonY = 20 + Math.random() * 60;
+                
+                noBtn.style.transform = `translate(${noButtonX}vw, ${noButtonY}vh)`;
+                
+                // Shake animation
+                noBtn.style.transition = 'transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            }
+        }
+
+        // Mouse move tracking for evasion
+        document.addEventListener('mousemove', evadeNoButton);
+
+        // Touch evasion for mobile
+        document.addEventListener('touchmove', function(e) {
+            if (isEvasive) {
+                const touch = e.touches[0];
+                evadeNoButton({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+        });
+
+        noBtn.addEventListener('mouseenter', function() {
+            if (!isEvasive) {
+                isEvasive = true;
+                noBtn.classList.add('evasive');
+                noBtn.style.position = 'fixed';
+                noBtn.style.transform = `translate(${noButtonX}vw, ${noButtonY}vh)`;
+            }
+        });
+
+        // Prevent actual clicking of no button
+        noBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Double evasion on click attempt
+            noButtonX = 20 + Math.random() * 60;
+            noButtonY = 20 + Math.random() * 60;
+            noBtn.style.transform = `translate(${noButtonX}vw, ${noButtonY}vh)`;
+        });
+
+        // Mobile responsiveness
+        function handleResize() {
+            if (window.innerWidth < 480 && isEvasive) {
+                noButtonX = 10 + Math.random() * 80;
+                noButtonY = 20 + Math.random() * 50;
+                noBtn.style.transform = `translate(${noButtonX}vw, ${noButtonY}vh)`;
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Initial heart burst
+        setTimeout(() => {
+            for(let i = 0; i < 5; i++) {
+                setTimeout(createHeart, i * 200);
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
